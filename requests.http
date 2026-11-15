@@ -1,0 +1,108 @@
+### ConfereAí - roteiro de testes (extensão REST Client do VS Code)
+### Troque @host pela URL do Azure para testar em produção
+@host = http://localhost:8080
+@api = {{host}}/api/v1
+
+### 1) Perguntas do teste do golpe (carregadas automaticamente)
+GET {{api}}/perguntas?somenteAtivas=true
+
+### 2) Cadastrar usuário (idoso) -> 201
+POST {{api}}/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Maria Aparecida da Silva",
+  "email": "maria.silva@email.com",
+  "telefone": "11987654321",
+  "dataNascimento": "1952-03-15"
+}
+
+### 3) Cadastrar pessoa de confiança -> 201 (vira principal)
+POST {{api}}/contatos
+Content-Type: application/json
+
+{
+  "nome": "Carlos",
+  "telefone": "11912345678",
+  "parentesco": "Filho",
+  "principal": true,
+  "usuarioId": 1
+}
+
+### 4a) Verificação 🟢 (Banco do Brasil, nome bate, nenhum SIM)
+POST {{api}}/verificacoes
+Content-Type: application/json
+
+{
+  "usuarioId": 1,
+  "tipoPagamento": "BOLETO",
+  "cnpj": "00.000.000/0001-91",
+  "nomeInformado": "Banco do Brasil",
+  "linhaDigitavel": "00190000090123456789012345678901123450000010000",
+  "valor": 150.00,
+  "respostasSim": []
+}
+
+### 4b) Verificação 🔴 (nome não bate + banco inexistente + pediram código)
+POST {{api}}/verificacoes
+Content-Type: application/json
+
+{
+  "usuarioId": 1,
+  "tipoPagamento": "PIX",
+  "cnpj": "00000000000191",
+  "nomeInformado": "Casas Bahia",
+  "codigoBanco": "999",
+  "valor": 899.90,
+  "respostasSim": [1, 2]
+}
+
+### 4c) CNPJ com dígito errado -> 🔴 sem nem consultar a Receita
+POST {{api}}/verificacoes
+Content-Type: application/json
+
+{
+  "usuarioId": 1,
+  "tipoPagamento": "PIX",
+  "cnpj": "12345678000100",
+  "respostasSim": [3]
+}
+
+### 5) Histórico do usuário
+GET {{api}}/verificacoes?usuarioId=1
+
+### 6) Consultas rápidas (BrasilAPI)
+GET {{api}}/consultas/cnpj/00000000000191
+
+###
+GET {{api}}/consultas/bancos/001
+
+### 7) Atualizar (PUT) -> 200
+PUT {{api}}/usuarios/1
+Content-Type: application/json
+
+{
+  "nome": "Maria Aparecida da Silva Souza",
+  "email": "maria.silva@email.com",
+  "telefone": "11987654321",
+  "dataNascimento": "1952-03-15"
+}
+
+### 8) Erros esperados
+### 400 - dados inválidos
+POST {{api}}/usuarios
+Content-Type: application/json
+
+{ "nome": "", "email": "nao-e-email", "telefone": "12" }
+
+### 404 - recurso inexistente
+GET {{api}}/usuarios/9999
+
+### 409 - e-mail repetido
+POST {{api}}/usuarios
+Content-Type: application/json
+
+{ "nome": "Outra Maria", "email": "maria.silva@email.com", "telefone": "11999998888" }
+
+### 9) Excluir (DELETE) -> 204
+DELETE {{api}}/verificacoes/1

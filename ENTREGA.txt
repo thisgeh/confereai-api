@@ -1,0 +1,7 @@
+GLOBAL SOLUTION - 3SIR
+INTEGRANTES
+Nome: Geisa Rodrigues Santos | RM: 558820
+Nome: Matheus Soares Pereira | RM: 558937
+GITHUB: https://github.com/thisgeh/confereai-api
+API AZURE: https://app-confereai-api.braveplant-f1031e4f.chilecentral.azurecontainerapps.io
+DOCKER HUB: https://hub.docker.com/r/thisgeh/confereai-api
